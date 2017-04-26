@@ -1,0 +1,3 @@
+[submodule "libmpsse"]
+	path = libmpsse
+	url = git@github.com:devttys0/libmpsse.git
