@@ -1,5 +1,8 @@
+#ifndef _PROGRAMMER_H
+#define _PROGRAMMER_H
 #include <mpsse.h>
 #include <stdint.h>
+#include "writeopt.h"
 enum opcode {
   PROGRAM_ENABLE		= 0b10101100,
   CHIP_ERASE			= 0b10001010,
@@ -37,5 +40,17 @@ void		pr_load_page_buffer(uint8_t* buffer);
 		     
 
 void print_buffer(uint8_t* buffer, size_t size);
+#define MAX_WRITEOPTS 8
+struct options{
+  int chip_erase;
+  int auto_erase;
+  int nwriteopts;
+  struct writeopt* writeopts[MAX_WRITEOPTS];
+};
+
+
+extern struct options options;
+
 
 extern uint8_t default_fuses[32];
+#endif
