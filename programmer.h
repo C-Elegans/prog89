@@ -20,14 +20,22 @@ enum opcode {
 };
 void pr_init(void);
 
-void pr_destroy(void);
+void		pr_destroy(void);
 
-void pr_run_command_rd(enum opcode cmd, uint8_t* addrdata, size_t addrsize, uint8_t* retbuf, size_t retbufsize);
-void pr_run_command_wr(enum opcode cmd, uint8_t* addrdata, size_t addrsize, uint8_t* writebuf, size_t writebufsize);
+void		pr_run_command_rd(enum opcode cmd, uint8_t* addrdata, size_t addrsize, uint8_t* retbuf, size_t retbufsize);
+void		pr_run_command_wr(enum opcode cmd, uint8_t* addrdata, size_t addrsize, uint8_t* writebuf, size_t writebufsize);
 
-void pr_enable_program_mode(void);
-uint8_t* pr_read_atmel_signature(void);
-uint8_t* pr_read_user_fuses(void);
-void pr_write_user_fuses(uint8_t* fuses);
+void		pr_enable_program_mode(void);
+uint8_t*	pr_read_atmel_signature(void);
+uint8_t*	pr_read_user_fuses(void);
+void		pr_write_user_fuses(uint8_t* fuses);
+void		pr_chip_erase(void);
+uint8_t		pr_read_status(void);
+void		pr_read_code_page(int pagenum, uint8_t* buffer);
+void		pr_write_code_page(int pagenum, uint8_t* buffer);
+void		pr_load_page_buffer(uint8_t* buffer);
+		     
+
+void print_buffer(uint8_t* buffer, size_t size);
 
 extern uint8_t default_fuses[32];
