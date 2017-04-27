@@ -21,6 +21,9 @@ enum opcode {
   READ_SIGNATURE_PAGE		= 0b00110010,
   READ_ATMEL_SIGNATURE_PAGE	= 0b00111000,
 };
+
+#define PAGE_SIZE 32
+
 void pr_init(void);
 
 void		pr_destroy(void);
@@ -45,6 +48,7 @@ struct options{
   int chip_erase;
   int auto_erase;
   int nwriteopts;
+  int memsize;
   struct writeopt* writeopts[MAX_WRITEOPTS];
 };
 

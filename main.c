@@ -3,10 +3,11 @@
 #include <getopt.h>
 #include "programmer.h"
 #include "writeopt.h"
+#include "run.h"
 
-#define OPT_STRING "DeU:"
+#define OPT_STRING "Dek:U:"
 
-struct options options = {.auto_erase = 1, .chip_erase = 0};
+struct options options = {.auto_erase = 1, .chip_erase = 0, .memsize = 2048};
 
 void cleanup(void){
   printf("Exiting\n");
@@ -25,6 +26,9 @@ int main(int argc, char** argv){
       break;
     case 'e':
       options.chip_erase = 1;
+      break;
+    case 'k':
+      options.memsize = atoi(optarg);
       break;
     case 'U':{
       struct writeopt* wropt = decode_writeopt(optarg);
@@ -49,6 +53,6 @@ int main(int argc, char** argv){
   atexit(cleanup);
   signal(SIGINT, inthandler);
   pr_enable_program_mode();
- 
+  run();
   return 0;
 }

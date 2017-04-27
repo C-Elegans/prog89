@@ -84,7 +84,7 @@ void pr_enable_program_mode(void){
 }
 uint8_t* pr_read_atmel_signature(void){
   uint8_t buf[2] = {0,0};
-  uint8_t ret[32] = {0};
+  uint8_t ret[PAGE_SIZE] = {0};
   pr_run_command_rd(READ_ATMEL_SIGNATURE_PAGE, buf, sizeof(buf),ret,sizeof(ret));
   print_buffer(ret,sizeof(ret));
   uint8_t* ret_buf = malloc(sizeof(ret));
@@ -122,23 +122,24 @@ uint8_t pr_read_status(void){
 }
 
 void pr_read_code_page(int pagenum, uint8_t* buffer){
-  assert(pagenum < 64 && pagenum >= 0);
+  assert(pagenum < (options.memsize/PAGE_SIZE) && pagenum >= 0);
   uint8_t addr_buf[2];
   addr_buf[0] = (pagenum >> 3) & 0x7;
   addr_buf[1] = (pagenum << 5) & 0xff;
-  pr_run_command_rd(READ_CODE_PAGE, addr_buf, sizeof(addr_buf), buffer, 32);
+  pr_run_command_rd(READ_CODE_PAGE, addr_buf, sizeof(addr_buf), buffer, PAGE_SIZE);
 }
 
 void pr_write_code_page(int pagenum, uint8_t* buffer){
+  enum opcode op = options.auto_erase ? WRITE_CODE_PAGE_ERASE : WRITE_CODE_PAGE;
   printf("Write code page\n");
-  assert(pagenum < 64 && pagenum >= 0);
+  assert(pagenum < (options.memsize/PAGE_SIZE) && pagenum >= 0);
   uint8_t addr_buf[2];
   addr_buf[0] = (pagenum >> 3) & 0x7;
   addr_buf[1] = (pagenum << 5) & 0xff;
   if(buffer)
-    pr_run_command_wr(WRITE_CODE_PAGE_ERASE, addr_buf, sizeof(addr_buf), buffer, 32);
+    pr_run_command_wr(op, addr_buf, sizeof(addr_buf), buffer, PAGE_SIZE);
   else
-    pr_run_command_wr(WRITE_CODE_PAGE_ERASE, addr_buf, sizeof(addr_buf), NULL, 0);
+    pr_run_command_wr(op, addr_buf, sizeof(addr_buf), NULL, 0);
   usleep(5500); //5ms = write cycle time with auto-erase
 }
 
@@ -146,5 +147,5 @@ void pr_write_code_page(int pagenum, uint8_t* buffer){
 void pr_load_page_buffer(uint8_t* buffer){
   printf("Load page buffer\n");
   uint8_t addr_buf[2] = {0,0};
-  pr_run_command_wr(LOAD_PAGE_BUFFER, addr_buf, sizeof(addr_buf), buffer, 32);
+  pr_run_command_wr(LOAD_PAGE_BUFFER, addr_buf, sizeof(addr_buf), buffer, PAGE_SIZE);
 }

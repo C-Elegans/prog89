@@ -4,3 +4,7 @@
 .\#*
 8051_prog
 compile_commands.json
+*.bin
+*.hex
+*.s
+*.asm
