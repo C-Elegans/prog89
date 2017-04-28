@@ -46,7 +46,10 @@ int main(int argc, char** argv){
     }
     
   }
-
+  if(optind != argc){
+    fprintf(stderr, "Non option argument: %s\n", argv[optind]);
+    exit(1);
+  }
 
   
   pr_init();

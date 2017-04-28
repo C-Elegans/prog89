@@ -1,6 +1,7 @@
 #include "run.h"
 #include <stdio.h>
 #include <string.h>
+#include "ihex.h"
 char* read_file_modes[] = {"w", "wb", "w"};
 
 size_t get_file_size(FILE* file){
@@ -15,6 +16,7 @@ size_t min_z(size_t a, size_t b){
 }
 
 void handle_read(struct writeopt* opt){
+  printf("Reading\n");
   FILE* output;
   if(opt->filename && strlen(opt->filename) > 0 && opt->filetype != FT_IMMEDIATE){
     output = fopen(opt->filename, read_file_modes[opt->filetype]);
@@ -37,37 +39,52 @@ void handle_read(struct writeopt* opt){
   }
 }
 
-char* write_file_modes[] = {"", "rb", ""};
+char* write_file_modes[] = {0, "rb", "rb", 0};
+
+int read_file(struct writeopt* opt, uint8_t** buffer, size_t* len){
+  FILE* input;
+  if(opt->filetype != FT_IMMEDIATE){
+    input = fopen(opt->filename, write_file_modes[opt->filetype]);
+    if(!input){
+      perror("Error opening file");
+    }
+  }
+  switch(opt->filetype){
+  case FT_RAW:{
+    *buffer = malloc(options.memsize);
+    memset(*buffer, 0xff, options.memsize);
+    *len = min_z(options.memsize, get_file_size(input));
+    fread(*buffer, *len, 1, input);
+    return 0;
+  }
+  case FT_IHEX:
+    printf("%p\n", input);
+    return parse_ihex(input, buffer, len);
+  default:
+    return 1;
+  }
+
+}
 
 void handle_write(struct writeopt* opt){
-  if(opt->filetype != FT_IMMEDIATE){
-    FILE* input = fopen(opt->filename, write_file_modes[opt->filetype]);
-    switch(opt->filetype){
-    case FT_RAW:
-      if(opt->memtype == MEM_FLASH){
-	uint8_t* buffer = malloc(options.memsize);
-	memset(buffer, 0xff, options.memsize);
-
-	size_t readlen = min_z(options.memsize, get_file_size(input));
-	fread(buffer, readlen, 1, input);
-	for(int i=0;i<options.memsize/PAGE_SIZE;i++){
-	  pr_write_code_page(i,buffer+i*PAGE_SIZE);
-	}
-      } else {
-	fprintf(stderr, "Not implemented yet\n");
-	exit(1);
+  if(opt->memtype == MEM_FLASH){
+    uint8_t* buffer;
+    size_t readlen;
+    if(read_file(opt,&buffer, &readlen) != -1){
+      readlen = (readlen + PAGE_SIZE - 1) & ~(PAGE_SIZE-1); //align to page size
+      for(size_t i=0;i<readlen/PAGE_SIZE;i++){
+	pr_write_code_page(i,buffer+i*PAGE_SIZE);
       }
-      break;
-    default:
-      fprintf(stderr, "Invalid filetype in write\n");
+    } else {
+      fprintf(stderr, "Error in read_file\n");
       exit(1);
     }
-
   } else {
     fprintf(stderr, "Not implemented yet\n");
     exit(1);
   }
-}
+} 
+
 void handle_verify(struct writeopt* opt){
 }
 

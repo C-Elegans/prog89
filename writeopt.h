@@ -15,6 +15,7 @@ enum op{
 enum filetype{
   FT_IMMEDIATE,
   FT_RAW,
+  FT_IHEX,
   FT_HEX, // Output only
 };
 struct writeopt{

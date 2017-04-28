@@ -44,8 +44,9 @@ enum filetype decode_filetype(char* str){
   }
   switch(str[0]){
   case 'r': return FT_RAW;
-  case 'i': return FT_IMMEDIATE;
+  case 'm': return FT_IMMEDIATE;
   case 'h': return FT_HEX;
+  case 'i': return FT_IHEX;
   default:
     error("Invalid format: %c\n",str[0]);
   }
