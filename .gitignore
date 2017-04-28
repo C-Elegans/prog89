@@ -10,3 +10,5 @@ compile_commands.json
 *.asm
 *.out
 test
+*.html
+prog89
