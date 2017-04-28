@@ -12,12 +12,11 @@
 
 prog89 -[eDUk] opts
 
-	-e           Run chip erase before programming
-	-D           Disable auto-erase when writing
-	-k [bytes]   Set size of chip memory (default 2048)
-	
-    -U memory:op:file:type
-                 memory: flash|fuse|lock|signature
+	-e			 Run chip erase before programming
+	-D			 Disable auto-erase when writing
+	-k [bytes]	 Set size of chip memory (default 2048)
+	-U memory:op:file:type
+				 memory: flash|fuse|lock|signature
 				 op: 
 					 r: read
 					 w: write
@@ -53,12 +52,12 @@ make install
 Connect your FTDI dongle's pins to the ISP pins on the AT89. This example 
 uses an AT89LP213 and an FT232H.
 
-| FTDI Pin | Name    | AT89 Pin | Name       |
+| FTDI Pin | Name	 | AT89 Pin | Name		 |
 | -------- | ------- | -------- | ---------- |
-|       13 | SCK     |        2 | GPI7/SCK   |
-|       14 | MOSI    |        1 | GPI5/MOSI  |
-|       15 | MISO    |       14 | GPI6/MISO  |
-|       16 | SS_n    |       13 | GPI4/SS_n  |
-|       17 | RESET_N |        3 | GPI5/RST_n |
-|      GND | GND     |      GND | GND        |
+|		13 | SCK	 |		  2 | GPI7/SCK	 |
+|		14 | MOSI	 |		  1 | GPI5/MOSI  |
+|		15 | MISO	 |		 14 | GPI6/MISO  |
+|		16 | SS_n	 |		 13 | GPI4/SS_n  |
+|		17 | RESET_N |		  3 | GPI5/RST_n |
+|	   GND | GND	 |		GND | GND		 |
 
