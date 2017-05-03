@@ -4,6 +4,10 @@
 #include <assert.h>
 #include "programmer.h"
 
+size_t max_z(size_t a, size_t b){
+  return a>b?a:b;
+}
+
 uint8_t ival(char c){
   if(c >= '0' && c <= '9'){
     return c - '0';
@@ -39,7 +43,7 @@ enum record_state{
   
 };
 
-
+//record state machine
 int parse_record(char* line, uint8_t* buffer, size_t* buflen){
   enum record_state state = STATE_INITIAL;
   size_t byte_count = 0;
@@ -58,14 +62,15 @@ int parse_record(char* line, uint8_t* buffer, size_t* buflen){
     case STATE_BYTE_COUNT:
       byte_count = readhex(line, 2);
       checksum += readhex(line,2);
-      *buflen += byte_count;
       line += 2;
       state = STATE_ADDR;
       break;
     case STATE_ADDR:
       addr = readhex(line,4);
-      checksum += readhex(line,4);
+      checksum += readhex(line,2);
+      checksum += readhex(line+2,2);
       buffer = buffer+addr;
+      *buflen = max_z(*buflen, addr);
       line += 4;
       state = STATE_REC_TYPE;
       break;
@@ -74,7 +79,12 @@ int parse_record(char* line, uint8_t* buffer, size_t* buflen){
       checksum += readhex(line,2);
       line += 2;
       switch(rec_type){
-      case 0: state = STATE_DATA; break;
+      case 0:
+	if(byte_count){
+	  state = STATE_DATA; break;
+	} else {
+	  state = STATE_CHECKSUM; break;
+	}
       case 1: return 1;
       default:
 	fprintf(stderr, "Invalid record type: %d\n",rec_type); exit(1); break;
@@ -84,6 +94,7 @@ int parse_record(char* line, uint8_t* buffer, size_t* buflen){
       if(byte_count--){
 	*buffer++ = readhex(line,2);
 	checksum += readhex(line,2);
+	*buflen += 1;
 	line +=2;
       } else {
 	state = STATE_CHECKSUM;
@@ -108,14 +119,16 @@ int parse_record(char* line, uint8_t* buffer, size_t* buflen){
 
 int parse_ihex(FILE* file, uint8_t** ret_buf, size_t* ret_len){
   uint8_t* buffer = malloc(options.memsize);
+  memset(buffer,0xff,options.memsize);
   uint8_t* current = buffer;
   size_t buflen = 0;
   char* line = NULL;
   size_t linelen = 0;
   ssize_t read;
   while((read = getline(&line, &linelen, file)) != -1) {
-    if(parse_record(line, current, &buflen) == -1) break;
+    if(parse_record(line, current, &buflen) != 0) break;
   }
+  free(line);
   *ret_buf = buffer;
   *ret_len = buflen;
   return 0;

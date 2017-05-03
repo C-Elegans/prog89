@@ -58,7 +58,6 @@ int read_file(struct writeopt* opt, uint8_t** buffer, size_t* len){
     return 0;
   }
   case FT_IHEX:
-    printf("%p\n", input);
     return parse_ihex(input, buffer, len);
   default:
     return 1;
