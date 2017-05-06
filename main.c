@@ -5,9 +5,9 @@
 #include "writeopt.h"
 #include "run.h"
 
-#define OPT_STRING "Dek:U:"
+#define OPT_STRING "Dek:U:d:"
 
-struct options options = {.auto_erase = 1, .chip_erase = 0, .memsize = 2048};
+struct options options = {.auto_erase = 1, .chip_erase = 0, .device = &at89lp213};
 
 void cleanup(void){
   printf("Exiting\n");
@@ -28,7 +28,7 @@ int main(int argc, char** argv){
       options.chip_erase = 1;
       break;
     case 'k':
-      options.memsize = atoi(optarg);
+      options.device->memsize = atoi(optarg);
       break;
     case 'U':{
       struct writeopt* wropt = decode_writeopt(optarg);
@@ -40,6 +40,9 @@ int main(int argc, char** argv){
       }
       break;
     }
+    case 'd':			/* Device */
+      options.device = device_from_string(optarg);
+      break;
     default:
       fprintf(stderr, "Unrecognized option -%c\n",c);
       exit(1);
@@ -56,6 +59,11 @@ int main(int argc, char** argv){
   atexit(cleanup);
   signal(SIGINT, inthandler);
   pr_enable_program_mode();
+  uint8_t fuses[64] = {0xff,0xff,0xff,0xff,0xff,0xff,0x00,0xff,0x00,0x00,0};
+  //pr_write_user_fuses(fuses);
+  //pr_read_status();
+  pr_read_user_fuses();
+  //pr_read_status();
   run();
   return 0;
 }

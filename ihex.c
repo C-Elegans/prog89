@@ -118,8 +118,8 @@ int parse_record(char* line, uint8_t* buffer, size_t* buflen){
 }
 
 int parse_ihex(FILE* file, uint8_t** ret_buf, size_t* ret_len){
-  uint8_t* buffer = malloc(options.memsize);
-  memset(buffer,0xff,options.memsize);
+  uint8_t* buffer = malloc(options.device->memsize);
+  memset(buffer,0xff,options.device->memsize);
   uint8_t* current = buffer;
   size_t buflen = 0;
   char* line = NULL;

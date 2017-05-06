@@ -1,6 +1,7 @@
 #include "run.h"
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "ihex.h"
 char* read_file_modes[] = {"w", "wb", "w"};
 
@@ -23,14 +24,17 @@ void handle_read(struct writeopt* opt){
   } else {
     output = stdout;
   }
-  uint8_t* buffer = malloc(options.memsize);
-  for(int i=0;i<options.memsize/PAGE_SIZE;i++){
+  uint8_t* buffer = malloc(options.device->memsize);
+  for(int i=0;i<options.device->memsize/PAGE_SIZE;i++){
     pr_read_code_page(i,buffer+i*PAGE_SIZE);
   }
   switch(opt->filetype){
   case FT_RAW:
-    fwrite(buffer, options.memsize, 1, output);
+    fwrite(buffer, options.device->memsize, 1, output);
     fclose(output);
+    break;
+  case FT_IMMEDIATE:
+    print_buffer(buffer, options.device->memsize);
     break;
   default:
     fprintf(stderr,"Not implemented yet\n");
@@ -51,9 +55,9 @@ int read_file(struct writeopt* opt, uint8_t** buffer, size_t* len){
   }
   switch(opt->filetype){
   case FT_RAW:{
-    *buffer = malloc(options.memsize);
-    memset(*buffer, 0xff, options.memsize);
-    *len = min_z(options.memsize, get_file_size(input));
+    *buffer = malloc(options.device->memsize);
+    memset(*buffer, 0xff, options.device->memsize);
+    *len = min_z(options.device->memsize, get_file_size(input));
     fread(*buffer, *len, 1, input);
     return 0;
   }
@@ -67,9 +71,11 @@ int read_file(struct writeopt* opt, uint8_t** buffer, size_t* len){
 
 void handle_write(struct writeopt* opt){
   if(opt->memtype == MEM_FLASH){
-    uint8_t* buffer;
-    size_t readlen;
+    uint8_t* buffer = NULL;
+    size_t readlen = 0;
     if(read_file(opt,&buffer, &readlen) != -1){
+      assert(readlen != 0);
+      assert(buffer != NULL);
       readlen = (readlen + PAGE_SIZE - 1) & ~(PAGE_SIZE-1); //align to page size
       for(size_t i=0;i<readlen/PAGE_SIZE;i++){
 	pr_write_code_page(i,buffer+i*PAGE_SIZE);
@@ -103,6 +109,9 @@ void handle_option(struct writeopt* opt){
 }
 
 void run(void){
+  uint8_t* sig = pr_read_atmel_signature();
+  print_buffer(sig,PAGE_SIZE);
+  free(sig);
   if(options.chip_erase){
     pr_chip_erase();
   }

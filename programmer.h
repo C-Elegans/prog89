@@ -3,6 +3,7 @@
 #include <mpsse.h>
 #include <stdint.h>
 #include "writeopt.h"
+#include "device.h"
 enum opcode {
   PROGRAM_ENABLE		= 0b10101100,
   CHIP_ERASE			= 0b10001010,
@@ -22,7 +23,8 @@ enum opcode {
   READ_ATMEL_SIGNATURE_PAGE	= 0b00111000,
 };
 
-#define PAGE_SIZE 32
+#define PAGE_SIZE options.device->pagesize
+#define PAGE_SIZE_MAX 64
 
 void pr_init(void);
 
@@ -43,12 +45,14 @@ void		pr_load_page_buffer(uint8_t* buffer);
 		     
 
 void print_buffer(uint8_t* buffer, size_t size);
+
+
 #define MAX_WRITEOPTS 8
 struct options{
   int chip_erase;
   int auto_erase;
   int nwriteopts;
-  int memsize;
+  struct device* device;
   struct writeopt* writeopts[MAX_WRITEOPTS];
 };
 

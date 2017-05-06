@@ -52,12 +52,11 @@ make install
 Connect your FTDI dongle's pins to the ISP pins on the AT89. This example 
 uses an AT89LP213 and an FT232H.
 
-| FTDI Pin | Name	 | AT89 Pin | Name		 |
-| -------- | ------- | -------- | ---------- |
-|		13 | SCK	 |		  2 | GPI7/SCK	 |
-|		14 | MOSI	 |		  1 | GPI5/MOSI  |
-|		15 | MISO	 |		 14 | GPI6/MISO  |
-|		16 | SS_n	 |		 13 | GPI4/SS_n  |
-|		17 | RESET_N |		  3 | GPI5/RST_n |
-|	   GND | GND	 |		GND | GND		 |
-
+| FTDI Pin | Name	 | AT89 Pin | Name      |
+|----------+--------------+----------+-----------|
+|       13 | SCK          |        2 | GPI7/SCK  |
+|       14 | MOSI         |        1 | GPI5/MOSI |
+|       15 | MISO         |       14 | GPI6/MISO |
+|       16 | SS_n         |       13 | GPI4/SS_n |
+|       17 | RST_n        |        3 | RST_n     |
+|      GND | GND          |      GND | GND       |

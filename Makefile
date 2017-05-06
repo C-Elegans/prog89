@@ -3,7 +3,7 @@ LIBMPSSE_LIB=libmpsse/src/libmpsse.a
 CFLAGS=-I$(LIBMPSSE_DIR)/src -std=c11 -Wall -Werror -Wextra -Wno-unused-parameter -Wno-unused-variable
 CFLAGS+=-fsanitize=address -Wimplicit-fallthrough -g
 PREFIX=/usr/local
-prog89: main.o programmer.o writeopt.o run.o ihex.o $(LIBMPSSE_LIB)
+prog89: main.o programmer.o writeopt.o run.o ihex.o device.o $(LIBMPSSE_LIB)
 	$(CC) $^ -o $@ -lftdi -fsanitize=address -g
 
 
