@@ -1,4 +1,4 @@
-# prog89
+* prog89
  A FT232x programmer for the atmel AT89S and LP series of microcontrollers. 
  NOTE: This programmer requires your FTDI module to support MPSSE. It will
  not work with older or "low end" ftdi modules. Modules known to work:
@@ -7,9 +7,8 @@
  * FT2232
  * FT4232
 
-## Usage:
-```bash
-
+** Usage:
+#+BEGIN_SRC bash
 prog89 -[eDUk] opts
 
 	-e			 Run chip erase before programming
@@ -36,19 +35,19 @@ prog89 -[eDUk] opts
 					 # Writes the data in iHex file "code.hex" to flash
 				 ./prog89 -U flash:r:out.bin:r
 					 # Reads data from flash into binary file "out.bin"
-```
+#+END_SRC
 
-## Dependencies: 
- * libftdi
- * libmpsse (included)
+** Dependencies: 
+ - libftdi
+ - libmpsse (included)
  
-## Building:
-```
+** Building:
+#+BEGIN_SRC bash
 make
 make install
-```
+#+END_SRC
 
-## Wiring:
+** Wiring:
 Connect your FTDI dongle's pins to the ISP pins on the AT89. This example 
 uses an AT89LP213 and an FT232H.
 
