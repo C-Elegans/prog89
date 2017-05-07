@@ -5,6 +5,12 @@
 #include <assert.h>
 struct mpsse_context *context = NULL;
 #define RESET_PIN GPIOL0
+#ifdef DEBUG
+#define DPRINT_BUFFER(...) print_buffer(__VA_ARGS__)
+#else
+#define DPRINT_BUFFER(...)
+#endif
+
 uint8_t default_fuses[32] = {
   0xff, 0xff,    //Internal RC Oscillator
   0xff, 0xff,    //4ms startup time
@@ -45,16 +51,16 @@ void pr_run_command_rd(enum opcode cmd,
   if(!options.device->needs_prefix)
     cmdbuf[0] = cmd;
   Start(context);
-  print_buffer((uint8_t*) cmdbuf, options.device->needs_prefix ? sizeof(cmdbuf) : 1);
+  DPRINT_BUFFER((uint8_t*) cmdbuf, options.device->needs_prefix ? sizeof(cmdbuf) : 1);
   Write(context, cmdbuf , options.device->needs_prefix ? sizeof(cmdbuf) : 1);
   if(addrsize){
-    print_buffer(addrdata, addrsize);
+    DPRINT_BUFFER(addrdata, addrsize);
     Write(context, (char*) addrdata, addrsize);
   }
   if(retbufsize){
     char* buf = Read(context, retbufsize);
     memcpy(retbuf,buf,retbufsize);
-    print_buffer(retbuf, retbufsize);
+    DPRINT_BUFFER(retbuf, retbufsize);
     free(buf);
   }
   Stop(context);
@@ -69,14 +75,14 @@ void pr_run_command_wr(enum opcode cmd,
   if(!options.device->needs_prefix)
     cmdbuf[0] = cmd;
   Start(context);
-  print_buffer((uint8_t*) cmdbuf, options.device->needs_prefix ? sizeof(cmdbuf) : 1);
+  DPRINT_BUFFER((uint8_t*) cmdbuf, options.device->needs_prefix ? sizeof(cmdbuf) : 1);
   Write(context, cmdbuf, options.device->needs_prefix ? sizeof(cmdbuf) : 1);
   if(addrsize){
-    print_buffer(addrdata, addrsize);
+    DPRINT_BUFFER(addrdata, addrsize);
     Write(context, (char*) addrdata, addrsize);
   }
   if(writebufsize){
-    print_buffer(writebuf, writebufsize);
+    DPRINT_BUFFER(writebuf, writebufsize);
     Write(context, (char*) writebuf, writebufsize);
   }
   Stop(context);
