@@ -13,7 +13,7 @@ prog89 -[eDUk] opts
 
 	-e			 Run chip erase before programming
 	-D			 Disable auto-erase when writing
-	-k [bytes]	 Set size of chip memory (default 2048)
+	-d devicename            Select device
 	-U memory:op:file:type
 				 memory: flash|fuse|lock|signature
 				 op: 
@@ -27,7 +27,7 @@ prog89 -[eDUk] opts
 					 m: immediate mode
 					 h: hex (output only)
 				 
-				 Performs <op> on <memory> type using <file>'s 
+				 Performs <op> on <memory> type using <file>\'s 
 				 data in <mode> mode
 				 
 				 Example:
@@ -35,7 +35,12 @@ prog89 -[eDUk] opts
 					 # Writes the data in iHex file "code.hex" to flash
 				 ./prog89 -U flash:r:out.bin:r
 					 # Reads data from flash into binary file "out.bin"
+				 ./prog89 -U fuses:w:ff00ff00ffff0000:m
+				         # Writes '0xff00ff00ffff0000' to the fuses
 #+END_SRC
+** Device Support
+ - AT89LP213/4 
+ - AT89LP52 (Coming soon!)
 
 ** Dependencies: 
  - libftdi
