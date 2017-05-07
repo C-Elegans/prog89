@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ihex.h"
-char* read_file_modes[] = {"w", "wb", "w"};
+char* read_file_modes[] = {NULL, "wb", "w", "w"};
 
 size_t get_file_size(FILE* file){
   fseek(file, 0, SEEK_END);
@@ -15,27 +15,44 @@ size_t min_z(size_t a, size_t b){
   return a > b ? b : a;
 }
 
-void handle_read(struct writeopt* opt){
-  printf("Reading\n");
+void write_file(uint8_t* buffer, size_t size, struct writeopt* opt){
   FILE* output;
   if(opt->filename && strlen(opt->filename) > 0 && opt->filetype != FT_IMMEDIATE){
     output = fopen(opt->filename, read_file_modes[opt->filetype]);
   } else {
     output = stdout;
   }
-  uint8_t* buffer = malloc(options.memsize);
-  for(int i=0;i<options.memsize/PAGE_SIZE;i++){
-    pr_read_code_page(i,buffer+i*PAGE_SIZE);
-  }
   switch(opt->filetype){
   case FT_RAW:
-    fwrite(buffer, options.memsize, 1, output);
+    fwrite(buffer, size, 1, output);
     fclose(output);
+    break;
+  case FT_IMMEDIATE:
+    print_buffer(buffer, size);
     break;
   default:
     fprintf(stderr,"Not implemented yet\n");
     exit(1);
     break;
+  }
+}
+
+void handle_read(struct writeopt* opt){
+  printf("Reading\n");
+  uint8_t* buffer;
+  switch(opt->memtype){
+  case MEM_FLASH:
+    buffer = malloc(options.memsize);
+    for(int i=0;i<options.memsize/PAGE_SIZE;i++){
+      pr_read_code_page(i,buffer+i*PAGE_SIZE);
+    }
+    write_file(buffer, options.memsize, opt);
+    break;
+  default:
+    fprintf(stderr, "Not implemented yet\n");
+    exit(1);
+    break;
+  
   }
 }
 
