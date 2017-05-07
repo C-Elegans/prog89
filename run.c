@@ -38,7 +38,6 @@ void write_file(uint8_t* buffer, size_t size, struct writeopt* opt){
 }
 
 void handle_read(struct writeopt* opt){
-  printf("Reading\n");
   uint8_t* buffer;
   switch(opt->memtype){
   case MEM_FLASH:
@@ -55,11 +54,19 @@ void handle_read(struct writeopt* opt){
     write_file(buffer, PAGE_SIZE, opt);
     free(buffer);
     break;
-  default:
-    fprintf(stderr, "Not implemented yet\n");
-    exit(1);
+  case MEM_LOCK:
+    buffer = malloc(PAGE_SIZE);
+    pr_read_lock_bits(buffer);
+    write_file(buffer, PAGE_SIZE, opt);
+    free(buffer);
     break;
-  
+  case MEM_SIGNATURE:
+    buffer = malloc(2*PAGE_SIZE);
+    pr_read_user_signature(buffer);
+    write_file(buffer, PAGE_SIZE*2, opt);
+    free(buffer);
+    break;
+    // No default to give warnings for unimplemented memory types
   }
 }
 
@@ -108,19 +115,31 @@ void handle_write(struct writeopt* opt){
   uint8_t* buffer;
   size_t readlen;
   if(read_file(opt,&buffer, &readlen) != -1){
-    if(opt->memtype == MEM_FLASH){
+    switch(opt->memtype){
+    case MEM_FLASH:
       readlen = (readlen + PAGE_SIZE - 1) & ~(PAGE_SIZE-1); //align to page size
       for(size_t i=0;i<readlen/PAGE_SIZE;i++){
 	pr_write_code_page(i,buffer+i*PAGE_SIZE);
       }
-    } else if(opt->memtype == MEM_FUSE){
+      break;
+    case MEM_FUSE:
       readlen = (readlen + PAGE_SIZE - 1) & ~(PAGE_SIZE-1);
-      print_buffer(buffer, readlen);
-      //pr_write_user_fuses(buffer);
-      
-    } else {
+      pr_write_user_fuses(buffer);
+      break;
+    case MEM_SIGNATURE:{
+      uint8_t* buf2 = malloc(2*PAGE_SIZE);
+      memset(buf2, 0xff, 2*PAGE_SIZE);
+      memcpy(buf2, buffer, readlen);
+      readlen = 2*PAGE_SIZE;
+      print_buffer(buf2, readlen);
+      pr_write_user_signature(buf2);
+      free(buf2);
+      break;
+    }
+    default:
       fprintf(stderr, "Not implemented yet\n");
       exit(1);
+      break;
     }
     free(buffer);
   } else {
