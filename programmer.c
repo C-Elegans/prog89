@@ -106,13 +106,10 @@ uint8_t* pr_read_atmel_signature(void){
 
 }
 
-uint8_t* pr_read_user_fuses(void){
+uint8_t* pr_read_user_fuses(uint8_t* buffer){
   uint8_t buf[2] = {0,0};
-  uint8_t ret[PAGE_SIZE_MAX] = {0};
-  pr_run_command_rd(READ_USER_FUSES, buf, sizeof(buf),ret,PAGE_SIZE);
-  
-  usleep(5000);
-  return NULL;
+  pr_run_command_rd(READ_USER_FUSES, buf, sizeof(buf), buffer, PAGE_SIZE);
+  return buffer;
 }
 
 void pr_write_user_fuses(uint8_t* fuses){
@@ -163,4 +160,25 @@ void pr_load_page_buffer(uint8_t* buffer){
   printf("Load page buffer\n");
   uint8_t addr_buf[2] = {0,0};
   pr_run_command_wr(LOAD_PAGE_BUFFER, addr_buf, sizeof(addr_buf), buffer, PAGE_SIZE);
+}
+
+void pr_read_lock_bits(uint8_t* buffer){
+  uint8_t addr[2] = {0,0};
+  pr_run_command_rd(READ_LOCK_BITS, addr, sizeof(addr), buffer, PAGE_SIZE);
+}
+void pr_write_lock_bits(uint8_t* buffer){
+  uint8_t addr[2] = {0,0};
+  pr_run_command_wr(WRITE_LOCK_BITS, addr, sizeof(addr), buffer, PAGE_SIZE);
+}
+void pr_read_user_signature(uint8_t* buffer){
+  uint8_t addr[2] = {0,0};
+  pr_run_command_rd(READ_SIGNATURE_PAGE, addr, sizeof(addr), buffer, PAGE_SIZE);
+  addr[1] = PAGE_SIZE;
+  pr_run_command_rd(READ_SIGNATURE_PAGE, addr, sizeof(addr), buffer+PAGE_SIZE, PAGE_SIZE);
+}
+void pr_write_user_signature(uint8_t* buffer){
+  uint8_t addr[2] = {0,0};
+  pr_run_command_wr(WRITE_SIGNATURE_PAGE_ERASE, addr, sizeof(addr), buffer, PAGE_SIZE);
+  addr[1] = PAGE_SIZE;
+  pr_run_command_wr(WRITE_SIGNATURE_PAGE_ERASE, addr, sizeof(addr), buffer+PAGE_SIZE, PAGE_SIZE);
 }
