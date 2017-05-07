@@ -42,11 +42,11 @@ void handle_read(struct writeopt* opt){
   uint8_t* buffer;
   switch(opt->memtype){
   case MEM_FLASH:
-    buffer = malloc(options.memsize);
-    for(int i=0;i<options.memsize/PAGE_SIZE;i++){
+    buffer = malloc(options.device->memsize);
+    for(int i=0;i<options.device->memsize/PAGE_SIZE;i++){
       pr_read_code_page(i,buffer+i*PAGE_SIZE);
     }
-    write_file(buffer, options.memsize, opt);
+    write_file(buffer, options.device->memsize, opt);
     free(buffer);
     break;
   case MEM_FUSE:
@@ -168,9 +168,6 @@ void handle_option(struct writeopt* opt){
 }
 
 void run(void){
-  uint8_t* sig = pr_read_atmel_signature();
-  print_buffer(sig,PAGE_SIZE);
-  free(sig);
   if(options.chip_erase){
     pr_chip_erase();
   }

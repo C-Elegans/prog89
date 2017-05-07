@@ -59,11 +59,6 @@ int main(int argc, char** argv){
   atexit(cleanup);
   signal(SIGINT, inthandler);
   pr_enable_program_mode();
-  uint8_t fuses[64] = {0xff,0xff,0xff,0xff,0xff,0xff,0x00,0xff,0x00,0x00,0};
-  //pr_write_user_fuses(fuses);
-  //pr_read_status();
-  pr_read_user_fuses();
-  //pr_read_status();
   run();
   return 0;
 }
