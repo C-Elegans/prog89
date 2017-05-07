@@ -47,6 +47,13 @@ void handle_read(struct writeopt* opt){
       pr_read_code_page(i,buffer+i*PAGE_SIZE);
     }
     write_file(buffer, options.memsize, opt);
+    free(buffer);
+    break;
+  case MEM_FUSE:
+    buffer = malloc(PAGE_SIZE);
+    pr_read_user_fuses(buffer);
+    write_file(buffer, PAGE_SIZE, opt);
+    free(buffer);
     break;
   default:
     fprintf(stderr, "Not implemented yet\n");
@@ -83,20 +90,25 @@ int read_file(struct writeopt* opt, uint8_t** buffer, size_t* len){
 }
 
 void handle_write(struct writeopt* opt){
-  if(opt->memtype == MEM_FLASH){
-    uint8_t* buffer;
-    size_t readlen;
-    if(read_file(opt,&buffer, &readlen) != -1){
+  uint8_t* buffer;
+  size_t readlen;
+  if(read_file(opt,&buffer, &readlen) != -1){
+    if(opt->memtype == MEM_FLASH){
       readlen = (readlen + PAGE_SIZE - 1) & ~(PAGE_SIZE-1); //align to page size
       for(size_t i=0;i<readlen/PAGE_SIZE;i++){
 	pr_write_code_page(i,buffer+i*PAGE_SIZE);
       }
+    } else if(opt->memtype == MEM_FUSE){
+      readlen = (readlen + PAGE_SIZE - 1) & ~(PAGE_SIZE-1);
+      pr_write_user_fuses(buffer);
+      
     } else {
-      fprintf(stderr, "Error in read_file\n");
+      fprintf(stderr, "Not implemented yet\n");
       exit(1);
     }
+    free(buffer);
   } else {
-    fprintf(stderr, "Not implemented yet\n");
+    fprintf(stderr, "Error in read_file\n");
     exit(1);
   }
 } 

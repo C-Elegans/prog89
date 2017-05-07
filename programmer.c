@@ -93,12 +93,10 @@ uint8_t* pr_read_atmel_signature(void){
 
 }
 
-uint8_t* pr_read_user_fuses(void){
+uint8_t* pr_read_user_fuses(uint8_t* buffer){
   uint8_t buf[2] = {0,0};
-  uint8_t ret[0x13] = {0};
-  pr_run_command_rd(READ_USER_FUSES, buf, sizeof(buf),ret,sizeof(ret));
-  print_buffer(ret,sizeof(ret));
-  return NULL;
+  pr_run_command_rd(READ_USER_FUSES, buf, sizeof(buf), buffer, PAGE_SIZE);
+  return buffer;
 }
 
 void pr_write_user_fuses(uint8_t* fuses){
@@ -107,7 +105,7 @@ void pr_write_user_fuses(uint8_t* fuses){
   memcpy(data,fuses,0x13);
   print_buffer(data,sizeof(data));
   pr_run_command_wr(WRITE_USER_FUSES_ERASE, buf, sizeof(buf), data, sizeof(data));
-  while(!(pr_read_status() & 1)) {usleep(100);} //wait until write finishes
+  usleep(7500);
 }
 
 void pr_chip_erase(void){
