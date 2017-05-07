@@ -63,6 +63,7 @@ void handle_read(struct writeopt* opt){
   }
 }
 
+
 char* write_file_modes[] = {0, "rb", "rb", 0};
 
 int read_file(struct writeopt* opt, uint8_t** buffer, size_t* len){
@@ -81,6 +82,20 @@ int read_file(struct writeopt* opt, uint8_t** buffer, size_t* len){
     fread(*buffer, *len, 1, input);
     return 0;
   }
+  case FT_IMMEDIATE:{
+    *len = strlen(opt->filename)/2;
+    *len = (*len + PAGE_SIZE - 1) & ~(PAGE_SIZE-1);
+    *buffer = malloc(*len);
+    memset(*buffer, 0xff, *len);
+    size_t index = 0;
+    char* str = opt->filename;
+    while(index < *len && *str != 0 && *(str+1) != 0){
+      (*buffer)[index++] = readhex(str, 2);
+      str += 2;
+    }
+    return 0;
+  }
+    
   case FT_IHEX:
     return parse_ihex(input, buffer, len);
   default:
@@ -100,7 +115,8 @@ void handle_write(struct writeopt* opt){
       }
     } else if(opt->memtype == MEM_FUSE){
       readlen = (readlen + PAGE_SIZE - 1) & ~(PAGE_SIZE-1);
-      pr_write_user_fuses(buffer);
+      print_buffer(buffer, readlen);
+      //pr_write_user_fuses(buffer);
       
     } else {
       fprintf(stderr, "Not implemented yet\n");
