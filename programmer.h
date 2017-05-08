@@ -56,6 +56,7 @@ struct options{
   int chip_erase;
   int auto_erase;
   int nwriteopts;
+  int pid;
   struct device* device;
   struct writeopt* writeopts[MAX_WRITEOPTS];
 };

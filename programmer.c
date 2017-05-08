@@ -27,7 +27,14 @@ uint8_t default_fuses[32] = {
 };
 
 void pr_init(void){
-  if((context = MPSSE(SPI0, ONE_MHZ/2, MSB)) == NULL || ! context->open){
+  static char str[32];
+  if(options.pid !=  0){
+    snprintf(str, sizeof(str), "FTDI Pid: 0x%04x", options.pid);
+    context = Open(0x0403, options.pid, SPI0, 500000, MSB, IFACE_A, NULL, NULL);
+  } else {
+    context = MPSSE(SPI0, ONE_MHZ/2, MSB);
+  }
+  if(context == NULL || !context->open){
     fprintf(stderr,"Failed to initialize MPSSE: %s\n", ErrorString(context));
     exit(1);
   }
@@ -43,10 +50,10 @@ void pr_destroy(void){
   
 }
 void pr_run_command_rd(enum opcode cmd,
-		       uint8_t* addrdata,
-		       size_t addrsize,
-		       uint8_t* retbuf,
-		       size_t retbufsize){
+                       uint8_t* addrdata,
+                       size_t addrsize,
+                       uint8_t* retbuf,
+                       size_t retbufsize){
   char cmdbuf[3] ={0xAA, 0x55, (char) cmd};
   if(!options.device->needs_prefix)
     cmdbuf[0] = cmd;
@@ -67,10 +74,10 @@ void pr_run_command_rd(enum opcode cmd,
  
 }
 void pr_run_command_wr(enum opcode cmd,
-		       uint8_t* addrdata,
-		       size_t addrsize,
-		       uint8_t* writebuf,
-		       size_t writebufsize){
+                       uint8_t* addrdata,
+                       size_t addrsize,
+                       uint8_t* writebuf,
+                       size_t writebufsize){
   char cmdbuf[3] ={0xAA, 0x55, (char) cmd};
   if(!options.device->needs_prefix)
     cmdbuf[0] = cmd;

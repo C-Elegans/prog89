@@ -5,7 +5,7 @@
 #include "writeopt.h"
 #include "run.h"
 
-#define OPT_STRING "Dek:U:d:"
+#define OPT_STRING "DeU:d:p:"
 
 struct options options = {.auto_erase = 1, .chip_erase = 0, .device = &at89lp213};
 
@@ -27,8 +27,8 @@ int main(int argc, char** argv){
     case 'e':
       options.chip_erase = 1;
       break;
-    case 'k':
-      options.device->memsize = atoi(optarg);
+    case 'p':
+      options.pid = strtol(optarg, NULL, 0);
       break;
     case 'U':{
       struct writeopt* wropt = decode_writeopt(optarg);
