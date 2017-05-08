@@ -35,6 +35,20 @@ struct device at89s52 = {
   .commands = {
     {0b10101100},		/* PROGRAM ENABLE */
     {0b10101100},		/* CHIP ERASE */
+    {0b01100000},		/* READ STATUS */
+    {0b00000000},		/* LOAD PAGE BUFFER (Unavailible) */
+    {0b01010000},		/* WRITE CODE PAGE */
+    {0b01110000},		/* WRITE CODE PAGE ERASE */
+    {0b00110000},		/* READ CODE PAGE */
+    {0b01010001},		/* WRITE FUSES */
+    {0b01110001},		/* WRITE FUSES ERASE */
+    {0b00100001},		/* READ FUSES */
+    {0b01010100},		/* WRITE LOCK */
+    {0b00110100},		/* READ LOCK */
+    {0b01010010}, 		/* WRITE USER SIGNATURE */
+    {0b01110010},		/* WRITE SIGNATURE ERASE */
+    {0b00110010},		/* READ USER SIGNATURE */
+    {0b00111000},		/* READ ATMEL SIGNATURE */
 };
 
 
