@@ -49,14 +49,16 @@ void pr_destroy(void){
   Close(context);
   
 }
-void pr_run_command_rd(enum opcode cmd,
+void pr_run_command_rd(enum opcode command,
                        uint8_t* addrdata,
                        size_t addrsize,
                        uint8_t* retbuf,
                        size_t retbufsize){
-  char cmdbuf[3] ={0xAA, 0x55, (char) cmd};
+  unsigned char raw_cmd = options.device->commands[command].op;
+  assert(raw_cmd != 0);
+  char cmdbuf[3] ={0xAA, 0x55, (char) raw_cmd};
   if(!options.device->needs_prefix)
-    cmdbuf[0] = cmd;
+    cmdbuf[0] = raw_cmd;
   Start(context);
   DPRINT_BUFFER((uint8_t*) cmdbuf, options.device->needs_prefix ? sizeof(cmdbuf) : 1);
   Write(context, cmdbuf , options.device->needs_prefix ? sizeof(cmdbuf) : 1);
@@ -73,14 +75,16 @@ void pr_run_command_rd(enum opcode cmd,
   Stop(context);
  
 }
-void pr_run_command_wr(enum opcode cmd,
+void pr_run_command_wr(enum opcode command,
                        uint8_t* addrdata,
                        size_t addrsize,
                        uint8_t* writebuf,
                        size_t writebufsize){
-  char cmdbuf[3] ={0xAA, 0x55, (char) cmd};
+  unsigned char raw_cmd = options.device->commands[command].op;
+  assert(raw_cmd != 0);
+  char cmdbuf[3] ={0xAA, 0x55, (char) raw_cmd};
   if(!options.device->needs_prefix)
-    cmdbuf[0] = cmd;
+    cmdbuf[0] = raw_cmd;
   Start(context);
   DPRINT_BUFFER((uint8_t*) cmdbuf, options.device->needs_prefix ? sizeof(cmdbuf) : 1);
   Write(context, cmdbuf, options.device->needs_prefix ? sizeof(cmdbuf) : 1);

@@ -8,12 +8,33 @@ struct device at89lp213 = {
   .memsize = 2048,
   .pagesize = 32,
   .needs_prefix = 1,
+  .commands = {
+    {0b10101100}, 		        /* PROGRAM ENABLE */
+    {0b10001010},			/* CHIP ERASE */
+    {0b01100000},			/* READ STATUS */
+    {0b01010001},			/* LOAD PAGE BUFFER */
+    {0b01010000},			/* WRITE CODE PAGE */
+    {0b01110000},			/* WRITE CODE PAGE ERASE */
+    {0b00110000},			/* READ CODE PAGE */
+    {0b11100001},			/* WRITE FUSES */
+    {0b11110001},			/* WRITE FUSES ERASE */
+    {0b01100001},			/* READ FUSES */
+    {0b11100100},			/* WRITE LOCK */
+    {0b01100100},			/* READ LOCK */
+    {0b01010010},			/* WRITE USER SIGNATURE */
+    {0b01110010},			/* WRITE SIGNATURE ERASE */
+    {0b00110010},			/* READ USER SIGNATURE */
+    {0b00111000},			/* READ ATMEL SIGNATURE */
+  }
 };
 
 struct device at89s52 = {
   .memsize = 8192,
   .pagesize = 64,
   .needs_prefix = 0,
+  .commands = {
+    {0b10101100},		/* PROGRAM ENABLE */
+    {0b10101100},		/* CHIP ERASE */
 };
 
 
