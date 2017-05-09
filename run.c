@@ -168,7 +168,8 @@ void handle_option(struct writeopt* opt){
 }
 
 void run(void){
-  if(options.chip_erase){
+  verify_signature();
+  if(options.chip_erase == 1){
     pr_chip_erase();
   }
   for(int i=0;i<options.nwriteopts;i++){

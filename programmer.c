@@ -116,7 +116,7 @@ uint8_t* pr_read_atmel_signature(void){
   uint8_t buf[2] = {0,0};
   uint8_t ret[PAGE_SIZE_MAX] = {0};
   pr_run_command_rd(READ_ATMEL_SIGNATURE_PAGE, buf, sizeof(buf),ret,PAGE_SIZE);
-  print_buffer(ret,PAGE_SIZE);
+  //print_buffer(ret,PAGE_SIZE);
   uint8_t* ret_buf = malloc(PAGE_SIZE);
   memcpy(ret_buf,ret,PAGE_SIZE);
   return ret_buf;
@@ -139,7 +139,11 @@ void pr_write_user_fuses(uint8_t* fuses){
 }
 
 void pr_chip_erase(void){
-  pr_run_command_rd(CHIP_ERASE, NULL, 0, NULL, 0);
+  uint8_t buf[3] = {0b10000000,0,0};
+  if(!options.device->needs_prefix)
+    pr_run_command_wr(CHIP_ERASE,buf,sizeof(buf),NULL,0);
+  else
+    pr_run_command_rd(CHIP_ERASE, NULL, 0, NULL, 0);
 }
 
 uint8_t pr_read_status(void){
@@ -198,4 +202,16 @@ void pr_write_user_signature(uint8_t* buffer){
   pr_run_command_wr(WRITE_SIGNATURE_PAGE_ERASE, addr, sizeof(addr), buffer, PAGE_SIZE);
   addr[1] = PAGE_SIZE;
   pr_run_command_wr(WRITE_SIGNATURE_PAGE_ERASE, addr, sizeof(addr), buffer+PAGE_SIZE, PAGE_SIZE);
+}
+
+void verify_signature(void){
+  uint8_t *buffer = pr_read_atmel_signature();
+  uint8_t *signature = options.device->signature;
+  if(memcmp(buffer,options.device->signature,3) != 0){
+    fprintf(stderr, "Signature 0x%02x%02x%02x does not match 0x%02x%02x%02x\n",
+	    buffer[0], buffer[1], buffer[2], signature[0], signature[1], signature[2]);
+    exit(1);
+  }
+  free(buffer);
+
 }

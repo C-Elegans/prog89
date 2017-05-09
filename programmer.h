@@ -29,6 +29,7 @@ uint8_t		pr_read_status(void);
 void		pr_read_code_page(int pagenum, uint8_t* buffer);
 void		pr_write_code_page(int pagenum, uint8_t* buffer);
 void		pr_load_page_buffer(uint8_t* buffer);
+void            verify_signature(void);
 		     
 
 void print_buffer(uint8_t* buffer, size_t size);

@@ -1,10 +1,12 @@
 #ifndef _DEVICE_H
 #define _DEVICE_H
+#include <stdint.h>
 #include "command.h"
 struct device{
   int pagesize;
   int memsize;
   int needs_prefix;
+  uint8_t signature[3];
   struct command commands[COMMAND_MAX];
 };
 
