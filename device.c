@@ -8,6 +8,12 @@
 
 static yaml_parser_t parser;
 static FILE* config_file;
+#define STACK_SIZE 32
+yaml_event_t stack[STACK_SIZE];
+int stack_pointer = 0;
+yaml_event_t null_event = {
+  .type = YAML_NO_EVENT,
+};
 
 struct device at89lp213 = {
   .memsize = 2048,
@@ -73,6 +79,24 @@ static void init_parser(void){
   }
   yaml_parser_set_input_file(&parser, config_file);
 }
+
+void push(yaml_event_t event){
+  if(stack_pointer >= STACK_SIZE){
+    fprintf(stderr,"Stack overflow\n"); exit(1);
+  }
+  stack[stack_pointer++] = event;
+}
+yaml_event_t pop(void){
+  stack_pointer--;
+  if(stack_pointer < 0){
+    stack_pointer = 0;
+    return null_event;
+  }
+  return stack[stack_pointer];
+}
+
+
+
 static void parse_file(void){
   yaml_event_t event;
   do{
@@ -88,16 +112,29 @@ static void parse_file(void){
     case YAML_DOCUMENT_END_EVENT: puts("Document end"); break;
     case YAML_SEQUENCE_START_EVENT: puts("Start Sequence");
     case YAML_SEQUENCE_END_EVENT: puts("End Sequence");
-    case YAML_MAPPING_START_EVENT: puts("Start Mapping"); break;
+    case YAML_MAPPING_START_EVENT:{
+      yaml_event_t prev_event = pop();
+      if(prev_event.type == YAML_SCALAR_EVENT){
+	printf("%s:\n", prev_event.data.scalar.value);
+      }
+      break;
+    }
     case YAML_MAPPING_END_EVENT: puts("End Mapping"); break;
-    case YAML_SCALAR_EVENT:
-      printf("Got Scalar (value %s)\n", event.data.scalar.value); break;
+    case YAML_SCALAR_EVENT:{
+      yaml_event_t prev_event = pop();
+      if(prev_event.type == YAML_SCALAR_EVENT){
+	printf(" %s -> %s\n", prev_event.data.scalar.value, event.data.scalar.value);
+      } else {
+	push(event);
+      }
+      break;
+    }
+      
+      
     default: puts("Unknown event"); break;
 
     }
-    if(event.type != YAML_STREAM_END_EVENT)
-      yaml_event_delete(&event);
-
+    
   }while(event.type != YAML_STREAM_END_EVENT);
   yaml_event_delete(&event);
   yaml_parser_delete(&parser);
