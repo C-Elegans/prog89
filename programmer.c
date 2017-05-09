@@ -4,7 +4,8 @@
 #include <string.h>
 #include <assert.h>
 struct mpsse_context *context = NULL;
-#define RESET_PIN GPIOL0
+//#define DEBUG
+#define RESET_PIN GPIOL1
 #ifdef DEBUG
 #define DPRINT_BUFFER(...) print_buffer(__VA_ARGS__)
 #else
@@ -163,6 +164,9 @@ void pr_read_code_page(int pagenum, uint8_t* buffer){
 
 void pr_write_code_page(int pagenum, uint8_t* buffer){
   enum opcode op = options.auto_erase ? WRITE_CODE_PAGE_ERASE : WRITE_CODE_PAGE;
+  if(options.device->uses_half_page && pagenum & 1){
+    op = WRITE_CODE_PAGE;
+  }
   printf("Write code page, %d bytes\n", PAGE_SIZE);
   assert(pagenum < (options.device->memsize/PAGE_SIZE) && pagenum >= 0);
   

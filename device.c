@@ -9,6 +9,7 @@ struct device at89lp213 = {
   .pagesize = 32,
   .needs_prefix = 1,
   .signature = {0x1e, 0x27, 0xff},
+  .uses_half_page = 0,
   .commands = {
     {0b10101100}, 		        /* PROGRAM ENABLE */
     {0b10001010},			/* CHIP ERASE */
@@ -34,6 +35,7 @@ struct device at89s52 = {
   .pagesize = 64,
   .needs_prefix = 0,
   .signature = {0x1e, 0x54, 0x06},
+  .uses_half_page = 1,
   .commands = {
     {0b10101100},		/* PROGRAM ENABLE */
     {0b10101100},		/* CHIP ERASE */

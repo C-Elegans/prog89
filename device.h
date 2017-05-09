@@ -6,6 +6,7 @@ struct device{
   int pagesize;
   int memsize;
   int needs_prefix;
+  int uses_half_page;
   uint8_t signature[3];
   struct command commands[COMMAND_MAX];
 };
