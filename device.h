@@ -14,9 +14,5 @@ struct device{
 struct device* device_from_string(char*);
 int ilog2(int);
 
-extern struct device at89lp213;
-
-
-
 
 #endif

@@ -7,7 +7,7 @@
 
 #define OPT_STRING "DeU:d:p:"
 
-struct options options = {.auto_erase = 1, .chip_erase = 0, .device = &at89lp213,
+struct options options = {.auto_erase = 1, .chip_erase = 0, .device = NULL,
 			  .config_file_name="devices.yaml"};
 
 void cleanup(void){
@@ -19,6 +19,7 @@ void inthandler(int dummy){
 }
 
 int main(int argc, char** argv){
+  char* device_name = "at89lp213";
   int c;
   while((c = getopt(argc, argv, OPT_STRING)) != -1){
     switch(c){
@@ -42,7 +43,7 @@ int main(int argc, char** argv){
       break;
     }
     case 'd':			/* Device */
-      options.device = device_from_string(optarg);
+      device_name = optarg;
       break;
     default:
       fprintf(stderr, "Unrecognized option -%c\n",c);
@@ -55,7 +56,7 @@ int main(int argc, char** argv){
     exit(1);
   }
 
-  
+  options.device = device_from_string(device_name);
   pr_init();
   atexit(cleanup);
   signal(SIGINT, inthandler);

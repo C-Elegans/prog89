@@ -15,57 +15,6 @@ yaml_event_t null_event = {
   .type = YAML_NO_EVENT,
 };
 
-struct device at89lp213 = {
-  .memsize = 2048,
-  .pagesize = 32,
-  .needs_prefix = 1,
-  .signature = {0x1e, 0x27, 0xff},
-  .uses_half_page = 0,
-  .commands = {
-    {0b10101100}, 		        /* PROGRAM ENABLE */
-    {0b10001010},			/* CHIP ERASE */
-    {0b01100000},			/* READ STATUS */
-    {0b01010001},			/* LOAD PAGE BUFFER */
-    {0b01010000},			/* WRITE CODE PAGE */
-    {0b01110000},			/* WRITE CODE PAGE ERASE */
-    {0b00110000},			/* READ CODE PAGE */
-    {0b11100001},			/* WRITE FUSES */
-    {0b11110001},			/* WRITE FUSES ERASE */
-    {0b01100001},			/* READ FUSES */
-    {0b11100100},			/* WRITE LOCK */
-    {0b01100100},			/* READ LOCK */
-    {0b01010010},			/* WRITE USER SIGNATURE */
-    {0b01110010},			/* WRITE SIGNATURE ERASE */
-    {0b00110010},			/* READ USER SIGNATURE */
-    {0b00111000},			/* READ ATMEL SIGNATURE */
-  }
-};
-
-struct device at89s52 = {
-  .memsize = 8192,
-  .pagesize = 64,
-  .needs_prefix = 0,
-  .signature = {0x1e, 0x54, 0x06},
-  .uses_half_page = 1,
-  .commands = {
-    {0b10101100},		/* PROGRAM ENABLE */
-    {0b10101100},		/* CHIP ERASE */
-    {0b01100000},		/* READ STATUS */
-    {0b00000000},		/* LOAD PAGE BUFFER (Unavailible) */
-    {0b01010000},		/* WRITE CODE PAGE */
-    {0b01110000},		/* WRITE CODE PAGE ERASE */
-    {0b00110000},		/* READ CODE PAGE */
-    {0b01010001},		/* WRITE FUSES */
-    {0b01110001},		/* WRITE FUSES ERASE */
-    {0b00110001},		/* READ FUSES */
-    {0b01010100},		/* WRITE LOCK */
-    {0b00110100},		/* READ LOCK */
-    {0b01010010}, 		/* WRITE USER SIGNATURE */
-    {0b01110010},		/* WRITE SIGNATURE ERASE */
-    {0b00110010},		/* READ USER SIGNATURE */
-    {0b00111000},		/* READ ATMEL SIGNATURE */
-  }
-};
 
 static void init_parser(void){
   config_file = fopen(options.config_file_name, "r");
@@ -114,11 +63,11 @@ static struct device* parse_file(char* device_name){
     case YAML_DOCUMENT_START_EVENT: break;
     case YAML_DOCUMENT_END_EVENT: break;
     case YAML_SEQUENCE_START_EVENT:
-      puts("Sequence start");
+      //puts("Sequence start");
       push(event);
       command_pointer = 0;
       break;
-    case YAML_SEQUENCE_END_EVENT: puts("Sequence end"); break;
+    case YAML_SEQUENCE_END_EVENT: pop(); pop(); break;
     case YAML_MAPPING_START_EVENT:{
       yaml_event_t prev_event = pop();
       if(prev_event.type == YAML_SCALAR_EVENT){
@@ -131,7 +80,7 @@ static struct device* parse_file(char* device_name){
     case YAML_MAPPING_END_EVENT: break;
     case YAML_SCALAR_EVENT:{
       yaml_event_t prev_event = pop();
-      printf(" %s\n", event.data.scalar.value);
+      //printf(" %s\n", event.data.scalar.value);
       if(prev_event.type == YAML_SCALAR_EVENT){
 	char* key = (char*)prev_event.data.scalar.value;
 	char* value = (char*)event.data.scalar.value;
@@ -144,9 +93,10 @@ static struct device* parse_file(char* device_name){
 	    cur_dev->needs_prefix = strtol(value, NULL, 0);
 	  } else if(strcmp(key, "signature") == 0){
 	    int sig = strtol(value, NULL, 0);
-	    cur_dev->signature[0] = sig&255;
+	    cur_dev->signature[0] = (sig>>16) & 255;
 	    cur_dev->signature[1] = (sig>>8) & 255;
-	    cur_dev->signature[2] = (sig>>16) & 255;
+	    cur_dev->signature[2] = sig&255;
+	    
 	  } else if(strcmp(key,"uses_half_page") == 0){
 	    cur_dev->uses_half_page = strtol(value, NULL, 0);
 	  }
@@ -167,8 +117,8 @@ static struct device* parse_file(char* device_name){
 		fprintf(stderr, "Too many command values!\n");
 		exit(1);
 	      }
-	      cur_dev->commands[command_pointer++].op = strtol(value, NULL, 0);
-	  
+	      cur_dev->commands[command_pointer].op = strtol(value, NULL, 2);
+	      command_pointer++;
 	    }
 	  } else {
 	    fprintf(stderr, "Unrecognized Key: %s\n", key);
