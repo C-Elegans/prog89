@@ -1,0 +1,49 @@
+* Fuses
+** DONE Add support for reading/writing fuses
+   CLOSED: [2017-05-07 Sun 12:17]
+*** DONE Factor out =write-file= code in =handle-read=
+    CLOSED: [2017-05-07 Sun 09:39]
+*** DONE Add immediate mode support
+    CLOSED: [2017-05-07 Sun 11:18]
+**** DONE For reading
+     CLOSED: [2017-05-07 Sun 09:39]
+**** DONE For writing
+     CLOSED: [2017-05-07 Sun 11:18]
+*** DONE Add support for other memory types
+    CLOSED: [2017-05-07 Sun 12:17]
+**** DONE Fuses
+     CLOSED: [2017-05-07 Sun 10:09]
+**** DONE Lock bits
+     CLOSED: [2017-05-07 Sun 12:17]
+***** DONE Add Lock bit r/w in =programmer.c=
+      CLOSED: [2017-05-07 Sun 11:24]
+**** DONE Signature
+     CLOSED: [2017-05-07 Sun 12:10]
+***** DONE Add Signature r/w in =programmer.c=
+      CLOSED: [2017-05-07 Sun 11:29]
+
+
+
+* Get AT89LP52 support working
+Currently can read the atmel signature and write to flash,
+however fuses do not want to work (so no internal oscillator)
+and the whole thing is really finakky.
+
+
+* Config File
+Branch =config-file=
+** DONE Use config file for device info
+   Merged
+   CLOSED: [2017-05-09 Tue 13:49]
+Yaml Configuration, will need read file and populate the device struct
+*** DONE Find Suitable YAML Library
+    Libyaml
+    CLOSED: [2017-05-09 Tue 10:36]
+**** DONE Update Makefile (Possibly migrate to CMake)
+     No CMake
+     CLOSED: [2017-05-09 Tue 10:36]
+*** DONE Move current device options to yaml file
+    CLOSED: [2017-05-09 Tue 13:49]
+*** DONE Update device.c to load config file and populate device struct 
+    CLOSED: [2017-05-09 Tue 13:49]
+
