@@ -1,3 +1,6 @@
 [submodule "libmpsse"]
 	path = libmpsse
 	url = git@github.com:devttys0/libmpsse.git
+[submodule "libyaml"]
+	path = libyaml
+	url = git@github.com:yaml/libyaml.git

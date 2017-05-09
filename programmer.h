@@ -43,7 +43,7 @@ struct options{
   int pid;
   struct device* device;
   struct writeopt* writeopts[MAX_WRITEOPTS];
-
+  char* config_file_name;
 };
 
 

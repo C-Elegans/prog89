@@ -7,7 +7,8 @@
 
 #define OPT_STRING "DeU:d:p:"
 
-struct options options = {.auto_erase = 1, .chip_erase = 0, .device = &at89lp213};
+struct options options = {.auto_erase = 1, .chip_erase = 0, .device = &at89lp213,
+			  .config_file_name="devices.yaml"};
 
 void cleanup(void){
   printf("Exiting\n");

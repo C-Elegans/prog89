@@ -1,0 +1,13 @@
+at89lp213:
+  memsize: 2048
+  pagesize: 32
+  needs_prefix: 1
+  signature: 0x1e27ff
+  uses_half_page: 0
+
+at89lp52:
+  memsize: 8192
+  pagesize: 64
+  needs_prefix: 0
+  signature: 0x1e5406
+  uses_half_page: 1
