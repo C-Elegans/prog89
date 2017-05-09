@@ -46,4 +46,5 @@ Yaml Configuration, will need read file and populate the device struct
     CLOSED: [2017-05-09 Tue 13:49]
 *** DONE Update device.c to load config file and populate device struct 
     CLOSED: [2017-05-09 Tue 13:49]
-
+*** DONE Compare device suffixes to select device
+    CLOSED: [2017-05-09 Tue 19:05]

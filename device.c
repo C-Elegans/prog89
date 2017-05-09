@@ -44,7 +44,17 @@ yaml_event_t pop(void){
   return stack[stack_pointer];
 }
 
-
+static int suffix_cmp(char* str1, char* str2){
+  size_t len1 = strlen(str1);
+  size_t len2 = strlen(str2);
+  if(len1 > len2){
+    size_t difference = len1-len2;
+    return strcmp(str1+difference, str2);
+  } else {
+    size_t difference = len2-len1;
+    return strcmp(str1, str2+difference);
+  }
+}
 
 
 static struct device* parse_file(char* device_name){
@@ -71,7 +81,7 @@ static struct device* parse_file(char* device_name){
     case YAML_MAPPING_START_EVENT:{
       yaml_event_t prev_event = pop();
       if(prev_event.type == YAML_SCALAR_EVENT){
-	if(strcmp((char*)prev_event.data.scalar.value, device_name) == 0){
+	if(suffix_cmp((char*)prev_event.data.scalar.value, device_name) == 0){
 	  cur_dev = malloc(sizeof(struct device));
 	}
       }
@@ -149,7 +159,7 @@ static struct device* parse_file(char* device_name){
 
 struct device* device_from_string(char* str){
   init_parser();
-  struct device* dev = parse_file("at89lp52");
+  struct device* dev = parse_file(str);
   if(!dev){
     fprintf(stderr,"Could not find device\n");
     exit(1);
