@@ -97,33 +97,87 @@ yaml_event_t pop(void){
 
 
 
-static void parse_file(void){
+
+static struct device* parse_file(char* device_name){
+  struct device* cur_dev = NULL;
   yaml_event_t event;
+  int command_pointer = 0;
   do{
     if(!yaml_parser_parse(&parser, &event)){
       fprintf(stderr, "Parse error in config file: %d\n", parser.error);
       exit(1);
     }
     switch(event.type){
-    case YAML_NO_EVENT: puts("No event!"); break;
-    case YAML_STREAM_START_EVENT: puts("Stream Start"); break;
-    case YAML_STREAM_END_EVENT: puts("Stream end"); break;
-    case YAML_DOCUMENT_START_EVENT: puts("Document start"); break;
-    case YAML_DOCUMENT_END_EVENT: puts("Document end"); break;
-    case YAML_SEQUENCE_START_EVENT: puts("Start Sequence");
-    case YAML_SEQUENCE_END_EVENT: puts("End Sequence");
+    case YAML_NO_EVENT: break;
+    case YAML_STREAM_START_EVENT: break;
+    case YAML_STREAM_END_EVENT: break;
+    case YAML_DOCUMENT_START_EVENT: break;
+    case YAML_DOCUMENT_END_EVENT: break;
+    case YAML_SEQUENCE_START_EVENT:
+      puts("Sequence start");
+      push(event);
+      command_pointer = 0;
+      break;
+    case YAML_SEQUENCE_END_EVENT: puts("Sequence end"); break;
     case YAML_MAPPING_START_EVENT:{
       yaml_event_t prev_event = pop();
       if(prev_event.type == YAML_SCALAR_EVENT){
-	printf("%s:\n", prev_event.data.scalar.value);
+	if(strcmp((char*)prev_event.data.scalar.value, device_name) == 0){
+	  cur_dev = malloc(sizeof(struct device));
+	}
       }
       break;
     }
-    case YAML_MAPPING_END_EVENT: puts("End Mapping"); break;
+    case YAML_MAPPING_END_EVENT: break;
     case YAML_SCALAR_EVENT:{
       yaml_event_t prev_event = pop();
+      printf(" %s\n", event.data.scalar.value);
       if(prev_event.type == YAML_SCALAR_EVENT){
-	printf(" %s -> %s\n", prev_event.data.scalar.value, event.data.scalar.value);
+	char* key = (char*)prev_event.data.scalar.value;
+	char* value = (char*)event.data.scalar.value;
+	if(cur_dev){
+	  if(strcmp(key, "memsize") == 0){
+	    cur_dev->memsize = strtol(value, NULL, 0);
+	  } else if(strcmp(key, "pagesize") == 0){
+	    cur_dev->pagesize = strtol(value, NULL, 0);
+	  } else if(strcmp(key, "needs_prefix") == 0){
+	    cur_dev->needs_prefix = strtol(value, NULL, 0);
+	  } else if(strcmp(key, "signature") == 0){
+	    int sig = strtol(value, NULL, 0);
+	    cur_dev->signature[0] = sig&255;
+	    cur_dev->signature[1] = (sig>>8) & 255;
+	    cur_dev->signature[2] = (sig>>16) & 255;
+	  } else if(strcmp(key,"uses_half_page") == 0){
+	    cur_dev->uses_half_page = strtol(value, NULL, 0);
+	  }
+	  else {
+	    fprintf(stderr, "Unrecognized Key: %s\n", key);
+	    exit(1);
+	  }
+	}
+
+      } else if(prev_event.type == YAML_SEQUENCE_START_EVENT){
+	yaml_event_t prev_prev_event = pop();
+	char* key = (char*) prev_prev_event.data.scalar.value;
+	char* value = (char*)event.data.scalar.value;
+	if(prev_prev_event.type == YAML_SCALAR_EVENT){
+	  if(strcmp(key, "commands") == 0){
+	    if(cur_dev){
+	      if(command_pointer >= COMMAND_MAX){
+		fprintf(stderr, "Too many command values!\n");
+		exit(1);
+	      }
+	      cur_dev->commands[command_pointer++].op = strtol(value, NULL, 0);
+	  
+	    }
+	  } else {
+	    fprintf(stderr, "Unrecognized Key: %s\n", key);
+	    exit(1);
+	  }
+	}
+
+	push(prev_prev_event);
+	push(prev_event);
       } else {
 	push(event);
       }
@@ -135,27 +189,22 @@ static void parse_file(void){
 
     }
     
-  }while(event.type != YAML_STREAM_END_EVENT);
+  }while((event.type != YAML_STREAM_END_EVENT) && !(event.type == YAML_MAPPING_END_EVENT && cur_dev));
   yaml_event_delete(&event);
   yaml_parser_delete(&parser);
   fclose(config_file);
+  return cur_dev;
 }
 
 
 struct device* device_from_string(char* str){
   init_parser();
-  parse_file();
-  if(strcasecmp(str,"at89lp213") == 0 || strcasecmp(str,"213") == 0){
-    return &at89lp213;
-  }
-  else if(strcasecmp(str,"at89s52") == 0 || strcasecmp(str,"at89lp52") == 0 ||
-	  strcasecmp(str,"52") == 0){
-    return &at89s52;
-  }
-  else{
-    fprintf(stderr, "Unknown device: %s\n",str);
+  struct device* dev = parse_file("at89lp52");
+  if(!dev){
+    fprintf(stderr,"Could not find device\n");
     exit(1);
   }
+  return dev;
 }
 
 int ilog2(int a){
