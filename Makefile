@@ -1,13 +1,17 @@
 LIBMPSSE_DIR=libmpsse
 LIBMPSSE_LIB=libmpsse/src/libmpsse.a
 LIBYAML_DIR=libyaml
-LIBYAML_LIB=$(LIBYAML_DIR)/src/.libs/libyaml.a
-CFLAGS=-I$(LIBMPSSE_DIR)/src -I$(LIBYAML_DIR)/include -std=c11 -Wall -Werror -Wextra
+LIBYAML_LIB=/usr/lib/libyaml.so
+
+DEVICE_YAML=$(shell pwd)/devices.yaml
+
+CFLAGS=-I$(LIBMPSSE_DIR)/src -I$(LIBYAML_DIR)/include -std=gnu11 -Wall -Werror -Wextra
 CFLAGS+=-Wno-unused-parameter -Wno-unused-variable
-CFLAGS+=-fsanitize=address -Wimplicit-fallthrough -g
+CFLAGS+=-Wimplicit-fallthrough -g
+CFLAGS+=-DDEVICES_YAML="\"$(DEVICE_YAML)\""
 PREFIX=/usr/local
 prog89: main.o programmer.o writeopt.o run.o ihex.o device.o $(LIBMPSSE_LIB) $(LIBYAML_LIB)
-	$(CC) $^ -o $@ -lftdi -fsanitize=address -g
+	$(CC) $^ -o $@ -lftdi -g
 
 
 $(LIBMPSSE_LIB):

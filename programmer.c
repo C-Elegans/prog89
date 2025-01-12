@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 struct mpsse_context *context = NULL;
 //#define DEBUG
 #define RESET_PIN GPIOL1
@@ -101,8 +102,11 @@ void pr_run_command_wr(enum opcode command,
 }
 
 void print_buffer(uint8_t* buffer, size_t len){
-  for(size_t i=0;i<len;i++)
+  for(size_t i=0;i<len;i++){
+    if(i%16 == 0 && i>0)
+      printf("\n");
     printf("%02x ", buffer[i]);
+  }
   printf("\n");
 }
 
@@ -145,6 +149,7 @@ void pr_chip_erase(void){
     pr_run_command_wr(CHIP_ERASE,buf,sizeof(buf),NULL,0);
   else
     pr_run_command_rd(CHIP_ERASE, NULL, 0, NULL, 0);
+  usleep(30000);
 }
 
 uint8_t pr_read_status(void){
@@ -173,11 +178,13 @@ void pr_write_code_page(int pagenum, uint8_t* buffer){
   uint8_t addr_buf[2];
   addr_buf[0] = (pagenum >> (8-ilog2(PAGE_SIZE))) & 0xff;
   addr_buf[1] = (pagenum << ilog2(PAGE_SIZE)) & 0xff;
-  if(buffer)
+  if(buffer){
     pr_run_command_wr(op, addr_buf, sizeof(addr_buf), buffer, PAGE_SIZE);
-  else
+  }
+  else {
     pr_run_command_wr(op, addr_buf, sizeof(addr_buf), NULL, 0);
-    usleep(5500); //5ms = write cycle time with auto-erase
+  }
+  usleep(10000); //5ms = write cycle time with auto-erase
 }
 
 //Don't use for now. Not exactly sure what "Load Page Buffer" does
